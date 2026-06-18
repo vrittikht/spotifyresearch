@@ -1,0 +1,28 @@
+# Secrets
+.streamlit/secrets.toml
+.env
+
+# Local data
+data/*.csv
+data/*.json
+data/reddit_html/*.html
+!data/.gitkeep
+!data/reddit_html/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env/
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
