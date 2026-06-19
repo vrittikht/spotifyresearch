@@ -2,7 +2,9 @@
 
 **Goal:** Live public URL on Streamlit Community Cloud; portfolio-ready demo.
 
-**Duration:** 4–5 hours · **Depends on:** Phase 6 · **Status:** Done (code & data ready — deploy when pushed)
+**Duration:** 4–5 hours · **Depends on:** Phase 6 · **Status:** Done
+
+**Live app:** [spotify-research.streamlit.app](https://spotify-research.streamlit.app/)
 
 ## Completed
 
@@ -31,12 +33,9 @@
 - [x] All 6 research questions answered (UI enriches from themes if Groq summary empty)
 - [x] README documents setup, pipeline, and deploy
 - [x] Demo script prepared
-- [ ] **Public URL live** — push to GitHub and deploy via [DEPLOY.md](./DEPLOY.md)
+- [x] **Public URL live** — [spotify-research.streamlit.app](https://spotify-research.streamlit.app/)
 - [ ] Screenshots saved for case study — use [screenshots/](./screenshots/) folder
 
-## Your next steps
+## Optional next steps
 
-1. `git push origin main` (verify `secrets.toml` is not tracked)
-2. Deploy on [Streamlit Cloud](https://share.streamlit.io) per [DEPLOY.md](./DEPLOY.md)
-3. Add live URL to root README under **Live demo**
-4. Walk through [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) once; save screenshots to `screenshots/`
+1. Walk through [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) once; save screenshots to `screenshots/`

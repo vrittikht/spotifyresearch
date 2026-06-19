@@ -2,7 +2,7 @@
 
 AI-powered **Review Discovery Engine** for a Spotify PM case study (Part 1). Collects public user feedback from Reddit and the Play Store, extracts structured insights with Groq, and surfaces themes and research answers in a Streamlit dashboard.
 
-**Live demo:** _Add your Streamlit Cloud URL after deploy — see [Deploy](#deploy-to-streamlit-community-cloud)._
+**Live demo:** [spotify-research.streamlit.app](https://spotify-research.streamlit.app/)
 
 ## What it does
 

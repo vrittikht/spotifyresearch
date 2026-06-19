@@ -11,7 +11,7 @@ This folder mirrors the [implementation plan](../implementationplan.md). Each ph
 | 4 — Insight generation | [phase_4_insights](./phase_4_insights/) | Done |
 | 5 — Streamlit dashboard | [phase_5_dashboard](./phase_5_dashboard/) | Done |
 | 6 — Admin & CLI | [phase_6_admin](./phase_6_admin/) | Done |
-| 7 — Deploy & polish | [phase_7_deploy](./phase_7_deploy/) | Done (deploy pending) |
+| 7 — Deploy & polish | [phase_7_deploy](./phase_7_deploy/) | Done |
 
 **Pipeline:**
 
