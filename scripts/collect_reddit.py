@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI: collect Reddit posts from public pages (no Reddit API)."""
+"""CLI: collect Reddit posts and ingest into Supabase (no Reddit API)."""
 
 from __future__ import annotations
 
@@ -19,11 +19,12 @@ from collectors.reddit_collector import (
     collect_reddit,
 )
 from services.config import get_secret
+from services.ingestion_service import ingest_reviews
 
 
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Collect Reddit posts from public pages (no Reddit API)"
+        description="Collect Reddit posts from public pages and ingest into Supabase"
     )
     parser.add_argument(
         "--subreddits",
@@ -40,23 +41,33 @@ def main() -> None:
     parser.add_argument(
         "--limit",
         type=int,
-        default=15,
-        help="Max posts per subreddit+keyword search (live mode only)",
+        default=100,
+        help="Max unique posts to collect (default: 100)",
     )
     parser.add_argument(
         "--html-dir",
         type=Path,
-        help="Import from manually saved HTML files (recommended; respects robots.txt)",
+        help="Import from manually saved HTML files (offline fallback)",
+    )
+    parser.add_argument(
+        "--scrape",
+        action="store_true",
+        help="Live scrape real Reddit data via RSS + old.reddit HTML (default when no --html-dir)",
     )
     parser.add_argument(
         "--live",
         action="store_true",
-        help="Attempt live fetch (usually blocked by Reddit robots.txt)",
+        help="Legacy live HTML mode (prefer --scrape)",
     )
     parser.add_argument(
         "--print-urls",
         action="store_true",
         help="Print search URLs to open manually in a browser",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Parse only — do not write to Supabase",
     )
     parser.add_argument(
         "--output",
@@ -75,15 +86,26 @@ def main() -> None:
                 print(collector.build_search_url(sub, kw))
         print("\nSave files to: data/reddit_html/{subreddit}_{keyword}.html")
         print("Then run: python scripts/collect_reddit.py --html-dir data/reddit_html")
-        return
+        return 0
+
+    html_dir = args.html_dir
+    use_scrape = args.scrape or (html_dir is None and not args.live and not args.print_urls)
+
+    if html_dir is None and not args.scrape and not args.live:
+        default_dir = ROOT / "data" / "reddit_html"
+        if default_dir.exists() and list(default_dir.glob("*.html")):
+            html_dir = default_dir
+            use_scrape = False
 
     result = collect_reddit(
         subreddits=args.subreddits,
         keywords=args.keywords,
         limit_per_search=args.limit,
-        html_dir=args.html_dir,
+        html_dir=html_dir,
         live=args.live,
+        scrape=use_scrape and html_dir is None,
         user_agent=user_agent,
+        limit=args.limit,
     )
 
     if result.warnings:
@@ -103,11 +125,30 @@ def main() -> None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(normalized, indent=2, default=str), encoding="utf-8")
         print(f"Saved {len(normalized)} posts to {args.output}")
-    elif normalized:
-        print(f"Sample: {normalized[0]['title'][:80]}")
-    elif not args.live and not args.html_dir:
-        print("Run with --print-urls for manual collection instructions.")
+
+    if not normalized:
+        if not args.live and not html_dir and not use_scrape:
+            print("Run with --scrape for live data or --print-urls for manual collection.")
+        return 0 if not result.errors else 1
+
+    if args.dry_run:
+        print(f"Dry run — would ingest {len(normalized)} reviews")
+        print(f"Sample: {normalized[0]['title'][:80] if normalized[0].get('title') else normalized[0]['body'][:80]}")
+        return 0
+
+    ingest = ingest_reviews(normalized, source="reddit")
+    print(f"Ingestion run {ingest.run_id}: inserted={ingest.inserted}, skipped={ingest.skipped}")
+    if ingest.errors:
+        print(f"Ingestion errors ({len(ingest.errors)}):")
+        for err in ingest.errors[:5]:
+            print(f"  - {err}")
+        return 1
+
+    if normalized:
+        title = normalized[0].get("title") or normalized[0]["body"]
+        print(f"Sample: {title[:80]}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
